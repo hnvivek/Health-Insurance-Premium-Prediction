@@ -2,11 +2,15 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import pickle
+from sklearn.preprocessing import StandardScaler
 
 
 
-pickle_in = open("regressor.pkl","rb")
-model=pickle.load(pickle_in)
+# load the model
+model = pickle.load(open('model.pkl', 'rb'))
+# load the scaler
+scaler = pickle.load(open('scaler.pkl', 'rb'))
+
 
 #st.title('My first app')
 
@@ -25,7 +29,7 @@ def main():
     children = st.text_input(" How many children do you have? ")
     smoker = st.selectbox('Are you a smoker?',('Select','Yes', 'No'))
     region = st.selectbox('Where do you live ?',('Select','North West', 'South East', 'South West'))
-    result=""
+    result=0
 
     if st.button("Predict"):
         NW = 0;
@@ -48,9 +52,17 @@ def main():
 
         print(age + str(sex_encoded) + str(bmi) + str(children) + str(smoker_encoded) + str(NW) + str(SE) + str(SW))
         print(1)
+        data = [[float(age),float(sex_encoded),float(bmi),float(children),float(smoker_encoded),float(NW),float(SE),float(SW)]]
+        data=np.array(data)
+        # transform the test dataset
+       # x=scaler.fit([[float(age),float(sex_encoded),float(bmi),float(children),float(smoker_encoded),float(NW),float(SE),float(SW)]])
+        X_test_scaled = scaler.fit_transform(data.reshape(8,-1))
+        X_test_scaled = X_test_scaled.reshape(-1, 8)
 
-        result=model.predict([[float(age),float(sex_encoded),float(bmi),float(children),float(smoker_encoded),float(NW),float(SE),float(SW)]])
-    if result is not "":
+
+        print(X_test_scaled)
+        result=model.predict(X_test_scaled)
+    if result != 0:
         st.success('Your Insurance Premium is {}'.format(result))
 
 
